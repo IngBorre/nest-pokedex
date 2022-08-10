@@ -4,6 +4,7 @@ import { isValidObjectId, Model } from 'mongoose';
 import { CreatePokemonDto } from './dto/create-pokemon.dto';
 import { UpdatePokemonDto } from './dto/update-pokemon.dto';
 import { Pokemon } from './entities/pokemon.entity';
+import { PaginationDto } from '../common/dto/pagination.dto';
 
 @Injectable()
 export class PokemonService {
@@ -26,8 +27,15 @@ export class PokemonService {
   }
 
   /** Buscar todos los Pokemon */
-  findAll() {
-    return `This action returns all pokemon`;
+  findAll(paginationDto: PaginationDto) {
+    const { limit = 10, offset = 0 } = paginationDto;
+    return this.pokemonModel.find()
+      .limit(limit)
+      .skip(offset)
+      .sort({
+        no: 1
+      })
+      .select('-__v');
   }
 
   /** Buscar un Pokemon por id, nombre, id-mongo */
@@ -73,8 +81,8 @@ export class PokemonService {
     //await pokemon.deleteOne();
     //const result = await this.pokemonModel.findByIdAndDelete(id);
     const { deletedCount } = await this.pokemonModel.deleteOne({ _id: id });
-    if( deletedCount === 0)
-      throw new BadRequestException(`Pokemonwith id "${ id }" not found`);
+    if (deletedCount === 0)
+      throw new BadRequestException(`Pokemonwith id "${id}" not found`);
 
     return;
   }
